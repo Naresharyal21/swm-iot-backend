@@ -2,6 +2,11 @@
   {
     "deviceId": "DEV-KTM-0001",
     "deviceKey": "key-0001",
-    "binCode": "BIN-002"
+    "binCode": "BIN-01"
+  },
+  {
+    "deviceId": "DEV-KTM-0002",
+    "deviceKey": "key-0002",
+    "binCode": "BIN-02"
   }
 ]
