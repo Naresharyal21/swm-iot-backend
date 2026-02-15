@@ -15,12 +15,15 @@ router.get("/health", (req, res) => res.json({ status: "ok" }));
 router.post("/telemetry", deviceAuth, async (req, res) => {
   try {
     const { ts, fillPercent, batteryPercent } = req.body || {};
-    const binCode = req.device.binCode;
-    if (!binCode) return res.status(500).json({ message: "Device is not linked to a binCode" });
+
+    // ✅ FIX: use binId coming from deviceAuth
+    const binId = req.device.binId;
+    if (!binId) return res.status(500).json({ message: "Device is not linked to a binId" });
 
     // Gate: the web-server Bin must exist and be ACTIVE
-    const bin = await Bin.findOne({ binId: binCode });
-    if (!bin) return res.status(404).json({ message: `Linked bin not found for binId=${binCode}` });
+    const bin = await Bin.findOne({ binId });
+    if (!bin) return res.status(404).json({ message: `Linked bin not found for binId=${binId}` });
+
     if (String(bin.status || "").toUpperCase() !== "ACTIVE") {
       return res.status(403).json({ message: "Bin is not ACTIVE" });
     }
@@ -49,7 +52,14 @@ router.post("/telemetry", deviceAuth, async (req, res) => {
     });
 
     // Update latest state in Bin document
-    const batteryState = batt === null ? (bin.batteryState || "OK") : batt <= 15 ? "CRITICAL" : batt <= 30 ? "LOW" : "OK";
+    const batteryState =
+      batt === null
+        ? (bin.batteryState || "OK")
+        : batt <= 15
+          ? "CRITICAL"
+          : batt <= 30
+            ? "LOW"
+            : "OK";
 
     bin.fillPercent = fill;
     bin.batteryPercent = batt;

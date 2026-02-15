@@ -4,14 +4,21 @@ const DeviceSchema = new mongoose.Schema(
   {
     deviceId: { type: String, required: true, unique: true, index: true },
     deviceKey: { type: String, required: true },
+
     /**
-     * Link to your WEB SERVER bin using its business identifier (e.g. "BIN-001").
-     * This avoids needing the IoT server to maintain a separate "iot_bins" collection.
+     * Link to WEB SERVER Bin using Bin.binId (e.g. "BIN-01").
+     * Device can exist without being paired yet.
      */
-    binCode: { type: String, required: true, index: true },
-    isActive: { type: Boolean, default: false, index: true }
+    binId: { type: String, default: null, index: true },
+
+    isActive: { type: Boolean, default: false, index: true },
+
+    pairedAt: { type: Date, default: null },
   },
   { timestamps: true, collection: "iot_devices" }
 );
+
+// Optional: prevent multiple devices linking to the same binId
+DeviceSchema.index({ binId: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model("Device", DeviceSchema);
